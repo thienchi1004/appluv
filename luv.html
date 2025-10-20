@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Wave Text — Love U So Much</title>
+<style>
+  :root{
+    --color:#ff5ca4;
+    --shadow: rgba(0,0,0,0.12);
+    --font-size: clamp(28px, 6vw, 64px);
+    --gap: 2px;
+    --duration: 1.15s; /* thời gian 1 chu kỳ wave */
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(180deg,#0b0710 0%, #201326 60%);
+    color:var(--color);
+    font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+
+  .wrap{
+    text-align:center;
+    padding:28px;
+    user-select:none;
+  }
+
+  .wave {
+    display:inline-block;
+    line-height:1;
+    font-weight:800;
+    font-size:var(--font-size);
+    letter-spacing:var(--gap);
+    text-shadow: 0 6px 18px var(--shadow);
+    transform: translateZ(0);
+    will-change: transform;
+  }
+
+  /* mỗi ký tự là một span.inline */
+  .wave .char{
+    display:inline-block;
+    transform-origin: center;
+    animation-name: waveUp;
+    animation-duration: var(--duration);
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(.36,.07,.19,.97);
+    /* delay được gán bằng biến --i (JS sẽ set) */
+    animation-delay: calc(var(--i) * 0.07s);
+    padding:0 1px;
+  }
+
+  /* keyframes lượn sóng (up -> peak -> down -> rest) */
+  @keyframes waveUp {
+    0%   { transform: translateY(0) scale(1); }
+    12%  { transform: translateY(-8%) scale(1.06); }
+    25%  { transform: translateY(-18%) scale(1.12); } /* peak */
+    38%  { transform: translateY(-8%) scale(1.06); }
+    50%  { transform: translateY(0) scale(1); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  /* tùy chỉnh hover: tăng biên độ wave khi rê */
+  .wave:hover .char {
+    animation-duration: 0.95s;
+  }
+  .wave:hover .char:nth-child(odd) { animation-delay: calc(var(--i) * 0.05s); }
+
+  /* một biến thể mượt hơn: thêm màu gradient cho chữ */
+  .gradient {
+    background: linear-gradient(90deg, #ff9ac9, #ff5ca4 50%, #ffd1e6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* responsive nhỏ: giảm kích thước */
+  @media (max-width:420px){
+    :root { --duration: 1.0s; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap" aria-label="Love U So Much">
+    <div id="waveText" class="wave gradient" aria-hidden="false">Love U So Much</div>
+  </div>
+
+<script>
+  // small helper: bọc từng ký tự vào span và gán biến --i cho delay
+  (function(){
+    const el = document.getElementById('waveText');
+    const text = el.textContent.trim();
+    el.textContent = ''; // clear
+    // split preserving spaces (replace spaces with non-breaking so spans keep width)
+    const arr = Array.from(text);
+    arr.forEach((ch, idx) => {
+      const span = document.createElement('span');
+      span.className = 'char';
+      span.style.setProperty('--i', idx);
+      span.textContent = (ch === ' ') ? '\u00A0' : ch; // NBSP for spacing
+      el.appendChild(span);
+    });
+    // optional: restart animation from center wave (set initial delays shifted)
+    // no extra code needed — CSS calc(var(--i) * 0.07s) already staggers
+  })();
+</script>
+</body>
+</html>
